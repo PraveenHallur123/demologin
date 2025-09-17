@@ -3,27 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Home</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Netlify Identity Login</title>
 </head>
 <body>
-  <h2>Welcome</h2>
-  <div id="content"></div>
-  <button onclick="logout()">Logout</button>
+  <h1>Welcome to My Site</h1>
+  <button id="login-button">Login / Signup</button>
+  <button id="logout-button" style="display:none;">Logout</button>
+  <div id="user-info"></div>
 
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script>
-    const user = localStorage.getItem('user');
-    const content = document.getElementById('content');
-    if(!user) {
-      window.location.href = 'login.html';
-    } else {
-      content.textContent = `Hello, ${user}!`;
-    }
+    netlifyIdentity.init();
 
-    function logout() {
-      localStorage.removeItem('user');
-      window.location.href = 'login.html';
-    }
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button');
+    const userInfo = document.getElementById('user-info');
+
+    netlifyIdentity.on('init', user => {
+      if (user) {
+        userInfo.textContent = `Logged in as ${user.email}`;
+        loginButton.style.display = 'none';
+        logoutButton.style.display = 'inline-block';
+      }
+    });
+
+    netlifyIdentity.on('login', user => {
+      userInfo.textContent = `Logged in as ${user.email}`;
+      loginButton.style.display = 'none';
+      logoutButton.style.display = 'inline-block';
+      netlifyIdentity.close();
+    });
+
+    netlifyIdentity.on('logout', () => {
+      userInfo.textContent = '';
+      loginButton.style.display = 'inline-block';
+      logoutButton.style.display = 'none';
+    });
+
+    loginButton.addEventListener('click', () => {
+      netlifyIdentity.open();
+    });
+
+    logoutButton.addEventListener('click', () => {
+      netlifyIdentity.logout();
+    });
   </script>
 </body>
 </html>
